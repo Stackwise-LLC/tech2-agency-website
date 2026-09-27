@@ -183,7 +183,78 @@ const DICT = {
 };
 
 function getLang() {
-  return localStorage.getItem(LANG_KEY) || 'fr';
+  return localStorage.getItem(LANG_KEY) || 'en';
+}
+
+function setMetaContent(selector, content) {
+  const element = document.querySelector(selector);
+  if (element && content) element.setAttribute('content', content);
+}
+
+function updateServiceMetadata(data, lang, serviceId) {
+  const title = `${data.title} | 2Tech Agency`;
+  const description = `${data.short} 2Tech Agency offers this service worldwide.`;
+  const url = `https://2techagency.space/service.html?s=${encodeURIComponent(serviceId)}`;
+  document.title = title;
+  document.querySelector('link[rel="canonical"]')?.setAttribute('href', url);
+  setMetaContent('meta[name="description"]', description);
+  setMetaContent('meta[name="robots"]', 'index, follow');
+  setMetaContent('meta[property="og:title"]', title);
+  setMetaContent('meta[property="og:description"]', description);
+  setMetaContent('meta[property="og:url"]', url);
+  setMetaContent('meta[name="twitter:title"]', title);
+  setMetaContent('meta[name="twitter:description"]', description);
+  const service = SERVICES.find((item) => item.id === serviceId);
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${url}#webpage`,
+        url,
+        name: title,
+        description,
+        inLanguage: lang,
+        mainEntity: { '@id': `${url}#service` },
+        breadcrumb: { '@id': `${url}#breadcrumb` },
+        isPartOf: { '@id': 'https://2techagency.space/#website' }
+      },
+      {
+        '@type': 'Service',
+        '@id': `${url}#service`,
+        name: data.title,
+        description: data.desc,
+        serviceType: data.title,
+        url,
+        provider: { '@id': 'https://2techagency.space/#organization' },
+        areaServed: ['Morocco', 'United States', 'Worldwide'],
+        offers: {
+          '@type': 'Offer',
+          price: service.priceUSD,
+          priceCurrency: 'USD',
+          url
+        }
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${url}#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: DICT['nav.home'][lang], item: 'https://2techagency.space/' },
+          { '@type': 'ListItem', position: 2, name: DICT['nav.services'][lang], item: 'https://2techagency.space/services.html' },
+          { '@type': 'ListItem', position: 3, name: data.title, item: url }
+        ]
+      }
+    ]
+  };
+  let schema = document.getElementById('pageStructuredData');
+  if (!schema) {
+    schema = document.createElement('script');
+    schema.id = 'pageStructuredData';
+    schema.type = 'application/ld+json';
+    document.head.append(schema);
+  }
+  schema.textContent = JSON.stringify(structuredData);
+  document.documentElement.setAttribute('lang', lang);
 }
 
 function applyLang(lang) {
@@ -203,7 +274,10 @@ function applyLang(lang) {
   });
 
   const langBtn = document.getElementById('langToggle');
-  if (langBtn) langBtn.textContent = lang.toUpperCase();
+  if (langBtn) {
+    langBtn.textContent = lang.toUpperCase();
+    langBtn.setAttribute('aria-label', lang === 'fr' ? 'Switch to English' : 'Passer au français');
+  }
 
   // Re-render any JS-driven content (services / projects lists) in the new language.
   document.dispatchEvent(new CustomEvent('langchange', { detail: { lang } }));
@@ -230,12 +304,20 @@ function initMobileMenu() {
   btn.addEventListener('click', () => {
     const open = nav.classList.toggle('open');
     btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   });
   nav.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => {
       nav.classList.remove('open');
       btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open menu');
     });
+  });
+}
+
+function initLazyImages() {
+  document.querySelectorAll('footer img').forEach((image) => {
+    image.loading = 'lazy';
   });
 }
 
@@ -243,185 +325,317 @@ function initMobileMenu() {
 // One entry per service. "icon" is a short 2-3 letter mark shown in the icon box
 // (placeholder for a real icon set / SVGs if the agency wants to add one later).
 const SERVICES = [
-  { id: 'web-design', cat: 'web', icon: 'UI',
+  {
+    id: 'web-design', cat: 'web', icon: 'UI',
     priceUSD: 800,
-    en: { title: 'Web Design', short: 'Interfaces that look sharp and guide visitors to act.',
+    en: {
+      title: 'Web Design', short: 'Interfaces that look sharp and guide visitors to act.',
       desc: 'We design custom, on-brand websites focused on clarity and conversion — from wireframe to pixel-perfect UI, ready to hand off to development.',
-      features: ['UX research & sitemap', 'Wireframes & prototypes', 'Custom visual design system', 'Responsive layouts for every screen', 'Handoff-ready design files'] },
-    fr: { title: 'Design Web', short: 'Des interfaces soignées qui incitent les visiteurs à agir.',
+      features: ['UX research & sitemap', 'Wireframes & prototypes', 'Custom visual design system', 'Responsive layouts for every screen', 'Handoff-ready design files']
+    },
+    fr: {
+      title: 'Design Web', short: 'Des interfaces soignées qui incitent les visiteurs à agir.',
       desc: 'Nous concevons des sites sur mesure, fidèles à votre marque, pensés pour la clarté et la conversion — du wireframe à l\u2019interface finale, prêts pour le développement.',
-      features: ['Recherche UX & plan du site', 'Wireframes & prototypes', 'Système de design visuel sur mesure', 'Mises en page responsives', 'Fichiers prêts pour le développement'] } },
-  { id: 'web-development', cat: 'web', icon: '{ }',
+      features: ['Recherche UX & plan du site', 'Wireframes & prototypes', 'Système de design visuel sur mesure', 'Mises en page responsives', 'Fichiers prêts pour le développement']
+    }
+  },
+  {
+    id: 'web-development', cat: 'web', icon: '{ }',
     priceUSD: 1500,
-    en: { title: 'Web Development', short: 'Fast, secure websites built with clean, maintainable code.',
+    en: {
+      title: 'Web Development', short: 'Fast, secure websites built with clean, maintainable code.',
       desc: 'From marketing sites to complex platforms, we build with performance, accessibility and long-term maintainability in mind.',
-      features: ['Custom front-end & back-end build', 'CMS integration where needed', 'Performance & SEO-friendly markup', 'Cross-browser & device testing', 'Deployment & hosting setup'] },
-    fr: { title: 'Développement Web', short: 'Des sites rapides et sécurisés, avec un code propre et maintenable.',
+      features: ['Custom front-end & back-end build', 'CMS integration where needed', 'Performance & SEO-friendly markup', 'Cross-browser & device testing', 'Deployment & hosting setup']
+    },
+    fr: {
+      title: 'Développement Web', short: 'Des sites rapides et sécurisés, avec un code propre et maintenable.',
       desc: 'Des sites vitrines aux plateformes complexes, nous développons en pensant performance, accessibilité et maintenabilité à long terme.',
-      features: ['Développement front-end & back-end sur mesure', 'Intégration CMS si nécessaire', 'Markup optimisé SEO & performance', 'Tests multi-navigateurs & appareils', 'Mise en ligne & configuration hébergement'] } },
-  { id: 'ecommerce', cat: 'web', icon: '$',
+      features: ['Développement front-end & back-end sur mesure', 'Intégration CMS si nécessaire', 'Markup optimisé SEO & performance', 'Tests multi-navigateurs & appareils', 'Mise en ligne & configuration hébergement']
+    }
+  },
+  {
+    id: 'ecommerce', cat: 'web', icon: '$',
     priceUSD: 2500,
-    en: { title: 'E-commerce Stores', short: 'Online stores built to sell, from catalog to checkout.',
+    en: {
+      title: 'E-commerce Stores', short: 'Online stores built to sell, from catalog to checkout.',
       desc: 'We build and configure e-commerce storefronts — product catalogs, secure checkout, shipping and payment integrations — tailored to your market.',
-      features: ['Storefront design & build', 'Payment & shipping integration', 'Product catalog structure', 'Inventory & order workflows', 'Conversion-focused checkout'] },
-    fr: { title: 'Boutiques E-commerce', short: 'Des boutiques en ligne pensées pour vendre, du catalogue au paiement.',
+      features: ['Storefront design & build', 'Payment & shipping integration', 'Product catalog structure', 'Inventory & order workflows', 'Conversion-focused checkout']
+    },
+    fr: {
+      title: 'Boutiques E-commerce', short: 'Des boutiques en ligne pensées pour vendre, du catalogue au paiement.',
       desc: 'Nous créons et configurons des boutiques e-commerce — catalogue produits, paiement sécurisé, intégrations livraison — adaptées à votre marché.',
-      features: ['Design & développement de la boutique', 'Intégration paiement & livraison', 'Structure du catalogue produits', 'Gestion des stocks & commandes', 'Tunnel d\u2019achat optimisé pour la conversion'] } },
-  { id: 'mobile-apps', cat: 'web', icon: '📱',
+      features: ['Design & développement de la boutique', 'Intégration paiement & livraison', 'Structure du catalogue produits', 'Gestion des stocks & commandes', 'Tunnel d\u2019achat optimisé pour la conversion']
+    }
+  },
+  {
+    id: 'mobile-apps', cat: 'web', icon: '📱',
     priceUSD: 5000,
-    en: { title: 'Mobile Apps', short: 'iOS and Android apps designed around real user needs.',
+    en: {
+      title: 'Mobile Apps', short: 'iOS and Android apps designed around real user needs.',
       desc: 'We design and build mobile applications for iOS and Android, from first prototype through to app store launch.',
-      features: ['Native & cross-platform build', 'UX flows for mobile', 'API & backend integration', 'App store submission support', 'Post-launch monitoring'] },
-    fr: { title: 'Applications Mobiles', short: 'Des applications iOS et Android pensées pour l\u2019utilisateur.',
+      features: ['Native & cross-platform build', 'UX flows for mobile', 'API & backend integration', 'App store submission support', 'Post-launch monitoring']
+    },
+    fr: {
+      title: 'Applications Mobiles', short: 'Des applications iOS et Android pensées pour l\u2019utilisateur.',
       desc: 'Nous concevons et développons des applications mobiles pour iOS et Android, du premier prototype jusqu\u2019à la publication sur les stores.',
-      features: ['Développement natif ou cross-platform', 'Parcours UX mobile', 'Intégration API & backend', 'Accompagnement publication sur les stores', 'Suivi post-lancement'] } },
-  { id: 'web-apps', cat: 'web', icon: '⌘',
+      features: ['Développement natif ou cross-platform', 'Parcours UX mobile', 'Intégration API & backend', 'Accompagnement publication sur les stores', 'Suivi post-lancement']
+    }
+  },
+  {
+    id: 'web-apps', cat: 'web', icon: '⌘',
     priceUSD: 6000,
-    en: { title: 'Web Applications & SaaS', short: 'Custom platforms and internal tools that scale with you.',
+    en: {
+      title: 'Web Applications & SaaS', short: 'Custom platforms and internal tools that scale with you.',
       desc: 'We design and engineer web applications and SaaS products — dashboards, portals, internal tools — built to scale with your business.',
-      features: ['Product discovery & architecture', 'Custom front-end & database design', 'User roles & permissions', 'Third-party integrations', 'Scalable hosting setup'] },
-    fr: { title: 'Applications Web & SaaS', short: 'Des plateformes sur mesure et outils internes qui évoluent avec vous.',
+      features: ['Product discovery & architecture', 'Custom front-end & database design', 'User roles & permissions', 'Third-party integrations', 'Scalable hosting setup']
+    },
+    fr: {
+      title: 'Applications Web & SaaS', short: 'Des plateformes sur mesure et outils internes qui évoluent avec vous.',
       desc: 'Nous concevons et développons des applications web et produits SaaS — dashboards, portails, outils internes — pensés pour évoluer avec votre activité.',
-      features: ['Cadrage produit & architecture', 'Front-end & base de données sur mesure', 'Rôles & permissions utilisateurs', 'Intégrations tierces', 'Hébergement évolutif'] } },
-  { id: 'maintenance', cat: 'web', icon: '⚙',
+      features: ['Cadrage produit & architecture', 'Front-end & base de données sur mesure', 'Rôles & permissions utilisateurs', 'Intégrations tierces', 'Hébergement évolutif']
+    }
+  },
+  {
+    id: 'maintenance', cat: 'web', icon: '⚙',
     priceUSD: 150, period: 'month',
-    en: { title: 'Maintenance & Support', short: 'Ongoing updates, monitoring and fixes for your site or app.',
+    en: {
+      title: 'Maintenance & Support', short: 'Ongoing updates, monitoring and fixes for your site or app.',
       desc: 'Keep your website or application secure, fast and up to date with a maintenance plan tailored to your platform.',
-      features: ['Security & software updates', 'Uptime & performance monitoring', 'Bug fixes & small improvements', 'Monthly reporting', 'Priority response times'] },
-    fr: { title: 'Maintenance & Support', short: 'Mises à jour, supervision et corrections continues pour votre site ou app.',
+      features: ['Security & software updates', 'Uptime & performance monitoring', 'Bug fixes & small improvements', 'Monthly reporting', 'Priority response times']
+    },
+    fr: {
+      title: 'Maintenance & Support', short: 'Mises à jour, supervision et corrections continues pour votre site ou app.',
       desc: 'Gardez votre site ou application sécurisé, rapide et à jour grâce à un plan de maintenance adapté à votre plateforme.',
-      features: ['Mises à jour sécurité & logicielles', 'Supervision de la disponibilité & performance', 'Corrections de bugs & petites améliorations', 'Rapport mensuel', 'Délais de réponse prioritaires'] } },
+      features: ['Mises à jour sécurité & logicielles', 'Supervision de la disponibilité & performance', 'Corrections de bugs & petites améliorations', 'Rapport mensuel', 'Délais de réponse prioritaires']
+    }
+  },
 
-  { id: 'seo', cat: 'marketing', icon: 'SEO',
+  {
+    id: 'seo', cat: 'marketing', icon: 'SEO',
     priceUSD: 500, period: 'month',
-    en: { title: 'SEO', short: 'Rank higher and earn qualified organic traffic.',
+    en: {
+      title: 'SEO', short: 'Rank higher and earn qualified organic traffic.',
       desc: 'We audit, optimize and monitor your site to improve rankings on the search engines your customers actually use.',
-      features: ['Technical SEO audit', 'On-page optimization', 'Keyword & competitor research', 'Content & link-building plan', 'Monthly ranking reports'] },
-    fr: { title: 'SEO', short: 'Gagnez en visibilité et générez un trafic organique qualifié.',
+      features: ['Technical SEO audit', 'On-page optimization', 'Keyword & competitor research', 'Content & link-building plan', 'Monthly ranking reports']
+    },
+    fr: {
+      title: 'SEO', short: 'Gagnez en visibilité et générez un trafic organique qualifié.',
       desc: 'Nous auditons, optimisons et suivons votre site pour améliorer votre positionnement sur les moteurs de recherche utilisés par vos clients.',
-      features: ['Audit SEO technique', 'Optimisation on-page', 'Recherche de mots-clés & concurrence', 'Plan de contenu & netlinking', 'Rapports de positionnement mensuels'] } },
-  { id: 'social-media', cat: 'marketing', icon: '#',
+      features: ['Audit SEO technique', 'Optimisation on-page', 'Recherche de mots-clés & concurrence', 'Plan de contenu & netlinking', 'Rapports de positionnement mensuels']
+    }
+  },
+  {
+    id: 'social-media', cat: 'marketing', icon: '#',
     priceUSD: 400, period: 'month',
-    en: { title: 'Social Media Management', short: 'Consistent, on-brand presence across your key platforms.',
+    en: {
+      title: 'Social Media Management', short: 'Consistent, on-brand presence across your key platforms.',
       desc: 'We plan, create and publish content across your social channels, and manage community engagement so you don\u2019t have to.',
-      features: ['Content calendar & planning', 'Post design & copywriting', 'Community management', 'Platform-specific strategy', 'Monthly performance review'] },
-    fr: { title: 'Gestion des Réseaux Sociaux', short: 'Une présence cohérente et fidèle à votre marque sur vos réseaux clés.',
+      features: ['Content calendar & planning', 'Post design & copywriting', 'Community management', 'Platform-specific strategy', 'Monthly performance review']
+    },
+    fr: {
+      title: 'Gestion des Réseaux Sociaux', short: 'Une présence cohérente et fidèle à votre marque sur vos réseaux clés.',
       desc: 'Nous planifions, créons et publions du contenu sur vos réseaux, et gérons l\u2019engagement communautaire pour vous libérer du temps.',
-      features: ['Calendrier & planification de contenu', 'Création visuelle & rédaction', 'Gestion de communauté', 'Stratégie par plateforme', 'Bilan de performance mensuel'] } },
-  { id: 'paid-ads', cat: 'marketing', icon: '▶',
+      features: ['Calendrier & planification de contenu', 'Création visuelle & rédaction', 'Gestion de communauté', 'Stratégie par plateforme', 'Bilan de performance mensuel']
+    }
+  },
+  {
+    id: 'paid-ads', cat: 'marketing', icon: '▶',
     priceUSD: 600, period: 'month',
-    en: { title: 'Paid Advertising', short: 'Google, Meta and LinkedIn campaigns built for ROI.',
+    en: {
+      title: 'Paid Advertising', short: 'Google, Meta and LinkedIn campaigns built for ROI.',
       desc: 'We plan, launch and optimize paid campaigns across search and social, with clear reporting tied to your actual business goals.',
-      features: ['Campaign strategy & targeting', 'Ad creative & copy', 'Landing page alignment', 'Budget management & bidding', 'ROI-focused reporting'] },
-    fr: { title: 'Publicité Payante', short: 'Des campagnes Google, Meta et LinkedIn pensées pour le ROI.',
+      features: ['Campaign strategy & targeting', 'Ad creative & copy', 'Landing page alignment', 'Budget management & bidding', 'ROI-focused reporting']
+    },
+    fr: {
+      title: 'Publicité Payante', short: 'Des campagnes Google, Meta et LinkedIn pensées pour le ROI.',
       desc: 'Nous planifions, lançons et optimisons vos campagnes payantes sur les moteurs de recherche et réseaux sociaux, avec un reporting lié à vos objectifs concrets.',
-      features: ['Stratégie de campagne & ciblage', 'Créations publicitaires & copywriting', 'Alignement des pages de destination', 'Gestion budget & enchères', 'Reporting axé sur le ROI'] } },
-  { id: 'content-marketing', cat: 'marketing', icon: '✎',
+      features: ['Stratégie de campagne & ciblage', 'Créations publicitaires & copywriting', 'Alignement des pages de destination', 'Gestion budget & enchères', 'Reporting axé sur le ROI']
+    }
+  },
+  {
+    id: 'content-marketing', cat: 'marketing', icon: '✎',
     priceUSD: 450, period: 'month',
-    en: { title: 'Content Marketing', short: 'Articles, guides and assets that build trust and traffic.',
+    en: {
+      title: 'Content Marketing', short: 'Articles, guides and assets that build trust and traffic.',
       desc: 'We plan and produce content — blog articles, guides, case studies — that supports SEO and moves prospects toward a decision.',
-      features: ['Content strategy & calendar', 'SEO-optimized writing', 'Case studies & guides', 'Editing & publishing', 'Performance tracking'] },
-    fr: { title: 'Marketing de Contenu', short: 'Articles, guides et contenus qui construisent confiance et trafic.',
+      features: ['Content strategy & calendar', 'SEO-optimized writing', 'Case studies & guides', 'Editing & publishing', 'Performance tracking']
+    },
+    fr: {
+      title: 'Marketing de Contenu', short: 'Articles, guides et contenus qui construisent confiance et trafic.',
       desc: 'Nous planifions et produisons du contenu — articles de blog, guides, études de cas — qui soutient le SEO et fait avancer vos prospects vers la décision.',
-      features: ['Stratégie & calendrier éditorial', 'Rédaction optimisée SEO', 'Études de cas & guides', 'Relecture & publication', 'Suivi de performance'] } },
-  { id: 'branding', cat: 'marketing', icon: '◈',
+      features: ['Stratégie & calendrier éditorial', 'Rédaction optimisée SEO', 'Études de cas & guides', 'Relecture & publication', 'Suivi de performance']
+    }
+  },
+  {
+    id: 'branding', cat: 'marketing', icon: '◈',
     priceUSD: 700,
-    en: { title: 'Branding & Identity', short: 'A visual identity that\u2019s consistent everywhere it appears.',
+    en: {
+      title: 'Branding & Identity', short: 'A visual identity that\u2019s consistent everywhere it appears.',
       desc: 'We define your visual identity — logo, colors, typography and guidelines — so your brand feels consistent across every touchpoint.',
-      features: ['Brand strategy workshop', 'Logo & visual identity', 'Brand guidelines document', 'Templates for key materials', 'Naming & tone of voice support'] },
-    fr: { title: 'Branding & Identité', short: 'Une identité visuelle cohérente sur tous vos supports.',
+      features: ['Brand strategy workshop', 'Logo & visual identity', 'Brand guidelines document', 'Templates for key materials', 'Naming & tone of voice support']
+    },
+    fr: {
+      title: 'Branding & Identité', short: 'Une identité visuelle cohérente sur tous vos supports.',
       desc: 'Nous définissons votre identité visuelle — logo, couleurs, typographie et guidelines — pour une marque cohérente sur tous vos points de contact.',
-      features: ['Atelier de stratégie de marque', 'Logo & identité visuelle', 'Charte graphique', 'Modèles pour vos supports clés', 'Accompagnement naming & ton de voix'] } },
-  { id: 'email-marketing', cat: 'marketing', icon: '✉',
+      features: ['Atelier de stratégie de marque', 'Logo & identité visuelle', 'Charte graphique', 'Modèles pour vos supports clés', 'Accompagnement naming & ton de voix']
+    }
+  },
+  {
+    id: 'email-marketing', cat: 'marketing', icon: '✉',
     priceUSD: 350, period: 'month',
-    en: { title: 'Email Marketing', short: 'Newsletters and automated flows that keep customers close.',
+    en: {
+      title: 'Email Marketing', short: 'Newsletters and automated flows that keep customers close.',
       desc: 'We design and set up email campaigns and automated flows — welcome sequences, newsletters, cart recovery — to keep your audience engaged.',
-      features: ['Email template design', 'List setup & segmentation', 'Automated flows (welcome, abandoned cart)', 'Newsletter production', 'Open & click-rate reporting'] },
-    fr: { title: 'Email Marketing', short: 'Newsletters et séquences automatisées qui fidélisent vos clients.',
+      features: ['Email template design', 'List setup & segmentation', 'Automated flows (welcome, abandoned cart)', 'Newsletter production', 'Open & click-rate reporting']
+    },
+    fr: {
+      title: 'Email Marketing', short: 'Newsletters et séquences automatisées qui fidélisent vos clients.',
       desc: 'Nous concevons et configurons vos campagnes email et séquences automatisées — bienvenue, newsletters, relance panier — pour engager votre audience.',
-      features: ['Design des templates email', 'Configuration & segmentation des listes', 'Séquences automatisées (bienvenue, panier abandonné)', 'Production de newsletters', 'Suivi des taux d\u2019ouverture & de clic'] } },
+      features: ['Design des templates email', 'Configuration & segmentation des listes', 'Séquences automatisées (bienvenue, panier abandonné)', 'Production de newsletters', 'Suivi des taux d\u2019ouverture & de clic']
+    }
+  },
 
-  { id: 'ai-chatbots', cat: 'ai', icon: '◉',
+  {
+    id: 'ai-chatbots', cat: 'ai', icon: '◉',
     priceUSD: 1200,
-    en: { title: 'AI Chatbots', short: 'Conversational assistants for support, sales and FAQs.',
+    en: {
+      title: 'AI Chatbots', short: 'Conversational assistants for support, sales and FAQs.',
       desc: 'We design and deploy AI-powered chatbots that answer questions, qualify leads and support customers, in French, English and Arabic.',
-      features: ['Conversation flow design', 'Integration with your knowledge base', 'Website & WhatsApp deployment', 'Multilingual support', 'Ongoing tuning & monitoring'] },
-    fr: { title: 'Chatbots IA', short: 'Des assistants conversationnels pour le support, la vente et les FAQ.',
+      features: ['Conversation flow design', 'Integration with your knowledge base', 'Website & WhatsApp deployment', 'Multilingual support', 'Ongoing tuning & monitoring']
+    },
+    fr: {
+      title: 'Chatbots IA', short: 'Des assistants conversationnels pour le support, la vente et les FAQ.',
       desc: 'Nous concevons et déployons des chatbots propulsés par l\u2019IA pour répondre aux questions, qualifier les prospects et assister vos clients, en français, anglais et arabe.',
-      features: ['Conception des scénarios de conversation', 'Intégration à votre base de connaissances', 'Déploiement site web & WhatsApp', 'Support multilingue', 'Réglage & suivi continus'] } },
-  { id: 'automation', cat: 'ai', icon: '⇄',
+      features: ['Conception des scénarios de conversation', 'Intégration à votre base de connaissances', 'Déploiement site web & WhatsApp', 'Support multilingue', 'Réglage & suivi continus']
+    }
+  },
+  {
+    id: 'automation', cat: 'ai', icon: '⇄',
     priceUSD: 900,
-    en: { title: 'Process Automation', short: 'Remove repetitive manual work from your team\u2019s day.',
+    en: {
+      title: 'Process Automation', short: 'Remove repetitive manual work from your team\u2019s day.',
       desc: 'We map your repetitive workflows and automate them — connecting the tools you already use — to save your team hours every week.',
-      features: ['Workflow audit & mapping', 'Tool-to-tool automation', 'Custom scripts where needed', 'Error handling & monitoring', 'Team training & handover'] },
-    fr: { title: 'Automatisation des Processus', short: 'Supprimez les tâches manuelles répétitives du quotidien de vos équipes.',
+      features: ['Workflow audit & mapping', 'Tool-to-tool automation', 'Custom scripts where needed', 'Error handling & monitoring', 'Team training & handover']
+    },
+    fr: {
+      title: 'Automatisation des Processus', short: 'Supprimez les tâches manuelles répétitives du quotidien de vos équipes.',
       desc: 'Nous cartographions vos processus répétitifs et les automatisons — en connectant les outils que vous utilisez déjà — pour faire gagner des heures à vos équipes chaque semaine.',
-      features: ['Audit & cartographie des processus', 'Automatisation entre outils', 'Scripts sur mesure si nécessaire', 'Gestion des erreurs & supervision', 'Formation & transmission à l\u2019équipe'] } },
-  { id: 'data-dashboards', cat: 'ai', icon: '▤',
+      features: ['Audit & cartographie des processus', 'Automatisation entre outils', 'Scripts sur mesure si nécessaire', 'Gestion des erreurs & supervision', 'Formation & transmission à l\u2019équipe']
+    }
+  },
+  {
+    id: 'data-dashboards', cat: 'ai', icon: '▤',
     priceUSD: 1800,
-    en: { title: 'Data Analysis & Dashboards', short: 'Clear dashboards that turn raw data into decisions.',
+    en: {
+      title: 'Data Analysis & Dashboards', short: 'Clear dashboards that turn raw data into decisions.',
       desc: 'We connect your data sources and build dashboards that surface the metrics that actually matter to your decisions.',
-      features: ['Data source integration', 'KPI definition workshop', 'Custom dashboard build', 'Automated reporting', 'Training on the final tool'] },
-    fr: { title: 'Analyse de Données & Dashboards', short: 'Des dashboards clairs qui transforment la donnée en décisions.',
+      features: ['Data source integration', 'KPI definition workshop', 'Custom dashboard build', 'Automated reporting', 'Training on the final tool']
+    },
+    fr: {
+      title: 'Analyse de Données & Dashboards', short: 'Des dashboards clairs qui transforment la donnée en décisions.',
       desc: 'Nous connectons vos sources de données et construisons des dashboards qui mettent en avant les indicateurs réellement utiles à vos décisions.',
-      features: ['Intégration des sources de données', 'Atelier de définition des KPI', 'Construction du dashboard sur mesure', 'Reporting automatisé', 'Formation à l\u2019outil final'] } },
-  { id: 'custom-ai', cat: 'ai', icon: '✦',
+      features: ['Intégration des sources de données', 'Atelier de définition des KPI', 'Construction du dashboard sur mesure', 'Reporting automatisé', 'Formation à l\u2019outil final']
+    }
+  },
+  {
+    id: 'custom-ai', cat: 'ai', icon: '✦',
     priceUSD: 3000,
-    en: { title: 'Custom AI Solutions', short: 'AI features built around your specific data and workflow.',
+    en: {
+      title: 'Custom AI Solutions', short: 'AI features built around your specific data and workflow.',
       desc: 'For needs beyond off-the-shelf tools, we design and build custom AI features — from document processing to recommendation systems.',
-      features: ['Feasibility & data assessment', 'Custom model or pipeline design', 'Integration into your product', 'Testing & evaluation', 'Documentation & handover'] },
-    fr: { title: 'Solutions IA Sur Mesure', short: 'Des fonctionnalités IA conçues autour de vos données et process.',
+      features: ['Feasibility & data assessment', 'Custom model or pipeline design', 'Integration into your product', 'Testing & evaluation', 'Documentation & handover']
+    },
+    fr: {
+      title: 'Solutions IA Sur Mesure', short: 'Des fonctionnalités IA conçues autour de vos données et process.',
       desc: 'Pour les besoins qui dépassent les outils standards, nous concevons des fonctionnalités IA sur mesure — du traitement de documents aux systèmes de recommandation.',
-      features: ['Étude de faisabilité & des données', 'Conception du modèle ou du pipeline', 'Intégration dans votre produit', 'Tests & évaluation', 'Documentation & transmission'] } },
-  { id: 'ai-integration', cat: 'ai', icon: '⬡',
+      features: ['Étude de faisabilité & des données', 'Conception du modèle ou du pipeline', 'Intégration dans votre produit', 'Tests & évaluation', 'Documentation & transmission']
+    }
+  },
+  {
+    id: 'ai-integration', cat: 'ai', icon: '⬡',
     priceUSD: 1500,
-    en: { title: 'AI Integration', short: 'Bring AI models like GPT and Claude into your existing tools.',
+    en: {
+      title: 'AI Integration', short: 'Bring AI models like GPT and Claude into your existing tools.',
       desc: 'We integrate AI models into your existing website, app or internal tools — safely, with the right guardrails for your use case.',
-      features: ['Use-case scoping', 'API integration & prompt design', 'Guardrails & safety review', 'Cost & performance monitoring', 'Team enablement'] },
-    fr: { title: 'Intégration IA', short: 'Intégrez des modèles comme GPT ou Claude à vos outils existants.',
+      features: ['Use-case scoping', 'API integration & prompt design', 'Guardrails & safety review', 'Cost & performance monitoring', 'Team enablement']
+    },
+    fr: {
+      title: 'Intégration IA', short: 'Intégrez des modèles comme GPT ou Claude à vos outils existants.',
       desc: 'Nous intégrons des modèles d\u2019IA à votre site, application ou outils internes existants — en toute sécurité, avec les garde-fous adaptés à votre usage.',
-      features: ['Cadrage du cas d\u2019usage', 'Intégration API & conception des prompts', 'Garde-fous & revue de sécurité', 'Suivi des coûts & performance', 'Accompagnement des équipes'] } },
+      features: ['Cadrage du cas d\u2019usage', 'Intégration API & conception des prompts', 'Garde-fous & revue de sécurité', 'Suivi des coûts & performance', 'Accompagnement des équipes']
+    }
+  },
 
-  { id: 'consulting', cat: 'business', icon: '◎',
+  {
+    id: 'consulting', cat: 'business', icon: '◎',
     priceUSD: 150, period: 'hour',
-    en: { title: 'Digital Consulting', short: 'An outside view on your digital priorities and roadmap.',
+    en: {
+      title: 'Digital Consulting', short: 'An outside view on your digital priorities and roadmap.',
       desc: 'We review your current digital setup and help you prioritize where to invest — website, marketing, tooling or automation.',
-      features: ['Digital audit', 'Prioritized roadmap', 'Budget & resourcing guidance', 'Vendor & tool recommendations', 'Quarterly check-ins'] },
-    fr: { title: 'Conseil Digital', short: 'Un regard extérieur sur vos priorités et votre feuille de route digitale.',
+      features: ['Digital audit', 'Prioritized roadmap', 'Budget & resourcing guidance', 'Vendor & tool recommendations', 'Quarterly check-ins']
+    },
+    fr: {
+      title: 'Conseil Digital', short: 'Un regard extérieur sur vos priorités et votre feuille de route digitale.',
       desc: 'Nous analysons votre dispositif digital actuel et vous aidons à prioriser vos investissements — site, marketing, outils ou automatisation.',
-      features: ['Audit digital', 'Feuille de route priorisée', 'Recommandations budget & ressources', 'Recommandations d\u2019outils & prestataires', 'Points d\u2019étape trimestriels'] } },
-  { id: 'crm', cat: 'business', icon: '◇',
+      features: ['Audit digital', 'Feuille de route priorisée', 'Recommandations budget & ressources', 'Recommandations d\u2019outils & prestataires', 'Points d\u2019étape trimestriels']
+    }
+  },
+  {
+    id: 'crm', cat: 'business', icon: '◇',
     priceUSD: 1200,
-    en: { title: 'CRM Setup & Optimization', short: 'A CRM that actually matches how your sales team works.',
+    en: {
+      title: 'CRM Setup & Optimization', short: 'A CRM that actually matches how your sales team works.',
       desc: 'We configure and optimize your CRM — pipelines, automations, reporting — so your sales and support teams get more from it.',
-      features: ['CRM selection guidance', 'Pipeline & workflow setup', 'Data migration & cleanup', 'Automation & reminders', 'Team training'] },
-    fr: { title: 'Mise en Place & Optimisation CRM', short: 'Un CRM réellement adapté au fonctionnement de vos équipes.',
+      features: ['CRM selection guidance', 'Pipeline & workflow setup', 'Data migration & cleanup', 'Automation & reminders', 'Team training']
+    },
+    fr: {
+      title: 'Mise en Place & Optimisation CRM', short: 'Un CRM réellement adapté au fonctionnement de vos équipes.',
       desc: 'Nous configurons et optimisons votre CRM — pipelines, automatisations, reporting — pour que vos équipes commerciales et support en tirent le meilleur parti.',
-      features: ['Aide au choix du CRM', 'Configuration des pipelines & workflows', 'Migration & nettoyage des données', 'Automatisations & rappels', 'Formation des équipes'] } },
-  { id: 'digital-transformation', cat: 'business', icon: '⇒',
+      features: ['Aide au choix du CRM', 'Configuration des pipelines & workflows', 'Migration & nettoyage des données', 'Automatisations & rappels', 'Formation des équipes']
+    }
+  },
+  {
+    id: 'digital-transformation', cat: 'business', icon: '⇒',
     priceUSD: 4000,
-    en: { title: 'Digital Transformation', short: 'Modernize how your organization works, tool by tool.',
+    en: {
+      title: 'Digital Transformation', short: 'Modernize how your organization works, tool by tool.',
       desc: 'We help traditional organizations move core processes online — from paper workflows to connected digital systems.',
-      features: ['Process mapping', 'Tool selection & rollout plan', 'Change management support', 'Staff training', 'Post-rollout support'] },
-    fr: { title: 'Transformation Digitale', short: 'Modernisez le fonctionnement de votre organisation, outil par outil.',
+      features: ['Process mapping', 'Tool selection & rollout plan', 'Change management support', 'Staff training', 'Post-rollout support']
+    },
+    fr: {
+      title: 'Transformation Digitale', short: 'Modernisez le fonctionnement de votre organisation, outil par outil.',
       desc: 'Nous aidons les organisations traditionnelles à digitaliser leurs processus clés — du papier aux systèmes digitaux connectés.',
-      features: ['Cartographie des processus', 'Sélection d\u2019outils & plan de déploiement', 'Accompagnement au changement', 'Formation du personnel', 'Support post-déploiement'] } },
-  { id: 'startup-launch', cat: 'business', icon: '↑',
+      features: ['Cartographie des processus', 'Sélection d\u2019outils & plan de déploiement', 'Accompagnement au changement', 'Formation du personnel', 'Support post-déploiement']
+    }
+  },
+  {
+    id: 'startup-launch', cat: 'business', icon: '↑',
     priceUSD: 2000,
-    en: { title: 'Startup Launch Packages', short: 'Everything a new venture needs to launch credibly, fast.',
+    en: {
+      title: 'Startup Launch Packages', short: 'Everything a new venture needs to launch credibly, fast.',
       desc: 'A bundled package — brand, website and initial marketing — for founders who need to launch quickly without cutting corners.',
-      features: ['Brand identity essentials', 'Launch website', 'Initial marketing setup', 'Social media accounts setup', 'Launch-week support'] },
-    fr: { title: 'Packs Lancement Startup', short: 'Tout ce qu\u2019il faut pour lancer une activité crédible, rapidement.',
+      features: ['Brand identity essentials', 'Launch website', 'Initial marketing setup', 'Social media accounts setup', 'Launch-week support']
+    },
+    fr: {
+      title: 'Packs Lancement Startup', short: 'Tout ce qu\u2019il faut pour lancer une activité crédible, rapidement.',
       desc: 'Un pack complet — identité, site web et marketing initial — pour les fondateurs qui doivent lancer vite, sans rogner sur la qualité.',
-      features: ['Identité de marque essentielle', 'Site web de lancement', 'Mise en place marketing initiale', 'Configuration des réseaux sociaux', 'Accompagnement semaine de lancement'] } },
-  { id: 'training', cat: 'business', icon: '▣',
+      features: ['Identité de marque essentielle', 'Site web de lancement', 'Mise en place marketing initiale', 'Configuration des réseaux sociaux', 'Accompagnement semaine de lancement']
+    }
+  },
+  {
+    id: 'training', cat: 'business', icon: '▣',
     priceUSD: 300,
-    en: { title: 'Training & Workshops', short: 'Hands-on sessions so your team can own the tools we set up.',
+    en: {
+      title: 'Training & Workshops', short: 'Hands-on sessions so your team can own the tools we set up.',
       desc: 'We run practical workshops for your team on the tools and systems we\u2019ve built or recommended, so you\u2019re never dependent on us alone.',
-      features: ['Custom workshop design', 'Hands-on sessions', 'Reference documentation', 'Recorded sessions on request', 'Follow-up Q&A'] },
-    fr: { title: 'Formations & Ateliers', short: 'Des sessions pratiques pour que votre équipe s\u2019approprie les outils.',
+      features: ['Custom workshop design', 'Hands-on sessions', 'Reference documentation', 'Recorded sessions on request', 'Follow-up Q&A']
+    },
+    fr: {
+      title: 'Formations & Ateliers', short: 'Des sessions pratiques pour que votre équipe s\u2019approprie les outils.',
       desc: 'Nous animons des ateliers pratiques pour votre équipe sur les outils et systèmes que nous avons mis en place ou recommandés, pour ne jamais dépendre uniquement de nous.',
-      features: ['Conception d\u2019ateliers sur mesure', 'Sessions pratiques', 'Documentation de référence', 'Sessions enregistrées sur demande', 'Questions-réponses de suivi'] } },
+      features: ['Conception d\u2019ateliers sur mesure', 'Sessions pratiques', 'Documentation de référence', 'Sessions enregistrées sur demande', 'Questions-réponses de suivi']
+    }
+  },
 ];
 
 const CATEGORY_LABELS = {
@@ -435,33 +649,51 @@ const CATEGORY_LABELS = {
 // PLACEHOLDER portfolio data. Each project uses a CSS/SVG gradient thumbnail
 // (see .project-thumb in style.css) — swap in a real <img> per project when photography exists.
 const PROJECTS = [
-  { id: 'atlas-market', cat: 'web', mark: 'AM',
+  {
+    id: 'atlas-market', cat: 'web', mark: 'AM',
     en: { title: 'Atlas Market', tag: 'E-commerce', desc: 'A multi-vendor e-commerce platform for Moroccan artisans, built for scale and speed.' },
-    fr: { title: 'Atlas Market', tag: 'E-commerce', desc: 'Une plateforme e-commerce multi-vendeurs pour artisans marocains, pensée pour la vitesse et la montée en charge.' } },
-  { id: 'nova-bank', cat: 'apps', mark: 'NB',
+    fr: { title: 'Atlas Market', tag: 'E-commerce', desc: 'Une plateforme e-commerce multi-vendeurs pour artisans marocains, pensée pour la vitesse et la montée en charge.' }
+  },
+  {
+    id: 'nova-bank', cat: 'apps', mark: 'NB',
     en: { title: 'Nova Bank App', tag: 'Mobile App', desc: 'A mobile banking app redesign for a European fintech, cutting onboarding time in half.' },
-    fr: { title: 'Application Nova Bank', tag: 'App Mobile', desc: 'Refonte d\u2019une application bancaire mobile pour une fintech européenne, réduisant de moitié le temps d\u2019onboarding.' } },
-  { id: 'greenroute', cat: 'web', mark: 'GR',
+    fr: { title: 'Application Nova Bank', tag: 'App Mobile', desc: 'Refonte d\u2019une application bancaire mobile pour une fintech européenne, réduisant de moitié le temps d\u2019onboarding.' }
+  },
+  {
+    id: 'greenroute', cat: 'web', mark: 'GR',
     en: { title: 'GreenRoute Logistics', tag: 'Web App', desc: 'A route-planning web app for a logistics company operating across North Africa.' },
-    fr: { title: 'GreenRoute Logistics', tag: 'Application Web', desc: 'Une application web de planification d\u2019itinéraires pour une entreprise de logistique en Afrique du Nord.' } },
-  { id: 'sable-cosmetics', cat: 'marketing', mark: 'SC',
+    fr: { title: 'GreenRoute Logistics', tag: 'Application Web', desc: 'Une application web de planification d\u2019itinéraires pour une entreprise de logistique en Afrique du Nord.' }
+  },
+  {
+    id: 'sable-cosmetics', cat: 'marketing', mark: 'SC',
     en: { title: 'Sable Cosmetics Launch', tag: 'Marketing Campaign', desc: 'Full-funnel paid and social campaign for a DTC cosmetics brand entering the Gulf market.' },
-    fr: { title: 'Lancement Sable Cosmetics', tag: 'Campagne Marketing', desc: 'Campagne paid & social full-funnel pour une marque de cosmétiques DTC lancée sur le marché du Golfe.' } },
-  { id: 'medina-eats', cat: 'apps', mark: 'ME',
+    fr: { title: 'Lancement Sable Cosmetics', tag: 'Campagne Marketing', desc: 'Campagne paid & social full-funnel pour une marque de cosmétiques DTC lancée sur le marché du Golfe.' }
+  },
+  {
+    id: 'medina-eats', cat: 'apps', mark: 'ME',
     en: { title: 'Medina Eats', tag: 'Mobile App', desc: 'A food delivery app connecting local restaurants with customers across three cities.' },
-    fr: { title: 'Medina Eats', tag: 'App Mobile', desc: 'Une application de livraison de repas reliant restaurants locaux et clients dans trois villes.' } },
-  { id: 'clarity-ai', cat: 'ai', mark: 'CX',
+    fr: { title: 'Medina Eats', tag: 'App Mobile', desc: 'Une application de livraison de repas reliant restaurants locaux et clients dans trois villes.' }
+  },
+  {
+    id: 'clarity-ai', cat: 'ai', mark: 'CX',
     en: { title: 'Clarity Support Bot', tag: 'AI Chatbot', desc: 'A multilingual support chatbot that resolved 62% of tickets without human intervention.' },
-    fr: { title: 'Clarity Support Bot', tag: 'Chatbot IA', desc: 'Un chatbot de support multilingue résolvant 62 % des tickets sans intervention humaine.' } },
-  { id: 'harbor-realty', cat: 'web', mark: 'HR',
+    fr: { title: 'Clarity Support Bot', tag: 'Chatbot IA', desc: 'Un chatbot de support multilingue résolvant 62 % des tickets sans intervention humaine.' }
+  },
+  {
+    id: 'harbor-realty', cat: 'web', mark: 'HR',
     en: { title: 'Harbor Realty', tag: 'Website', desc: 'A property listings website with a custom search and lead-capture system.' },
-    fr: { title: 'Harbor Realty', tag: 'Site Web', desc: 'Un site d\u2019annonces immobilières avec recherche personnalisée et système de capture de leads.' } },
-  { id: 'pulse-dash', cat: 'ai', mark: 'PD',
+    fr: { title: 'Harbor Realty', tag: 'Site Web', desc: 'Un site d\u2019annonces immobilières avec recherche personnalisée et système de capture de leads.' }
+  },
+  {
+    id: 'pulse-dash', cat: 'ai', mark: 'PD',
     en: { title: 'Pulse Sales Dashboard', tag: 'Data Dashboard', desc: 'A real-time sales dashboard unifying data from five regional offices for a manufacturing group.' },
-    fr: { title: 'Pulse Sales Dashboard', tag: 'Dashboard Data', desc: 'Un dashboard de ventes en temps réel unifiant les données de cinq bureaux régionaux pour un groupe industriel.' } },
-  { id: 'lumen-brand', cat: 'marketing', mark: 'LB',
+    fr: { title: 'Pulse Sales Dashboard', tag: 'Dashboard Data', desc: 'Un dashboard de ventes en temps réel unifiant les données de cinq bureaux régionaux pour un groupe industriel.' }
+  },
+  {
+    id: 'lumen-brand', cat: 'marketing', mark: 'LB',
     en: { title: 'Lumen Rebrand', tag: 'Branding', desc: 'A full visual identity refresh for a renewable energy consultancy expanding into new markets.' },
-    fr: { title: 'Refonte Lumen', tag: 'Branding', desc: 'Une refonte complète de l\u2019identité visuelle pour un cabinet de conseil en énergies renouvelables en expansion.' } },
+    fr: { title: 'Refonte Lumen', tag: 'Branding', desc: 'Une refonte complète de l\u2019identité visuelle pour un cabinet de conseil en énergies renouvelables en expansion.' }
+  },
 ];
 
 /* ---------- 6. Renderers ---------- */
@@ -480,7 +712,7 @@ function formatPrice(service, lang) {
   const amount = service.priceUSD.toLocaleString('en-US');
   const period = service.period === 'month' ? (lang === 'fr' ? '/mois' : '/mo')
     : service.period === 'hour' ? (lang === 'fr' ? '/heure' : '/hr')
-    : '';
+      : '';
   return lang === 'fr' ? `À partir de $${amount}${period}` : `From $${amount}${period}`;
 }
 
@@ -546,11 +778,12 @@ function renderServicePage() {
         </div>
       </div>`;
     document.title = `${DICT['service.notFoundTitle'][lang]} — 2Tech Agency`;
+    setMetaContent('meta[name="robots"]', 'noindex, follow');
     return;
   }
 
   const data = service[lang];
-  document.title = `${data.title} — 2Tech Agency`;
+  updateServiceMetadata(data, lang, service.id);
 
   const related = SERVICES.filter((s) => s.cat === service.cat && s.id !== service.id).slice(0, 3);
   const relatedHTML = related.map((s) => `
@@ -580,7 +813,7 @@ function renderServicePage() {
             </div>
           </div>
           <div class="card">
-            <h3>${DICT['service.whatsIncluded'][lang]}</h3>
+            <h2>${DICT['service.whatsIncluded'][lang]}</h2>
             <ul class="feature-list">
               ${data.features.map((f) => `<li>${f}</li>`).join('')}
             </ul>
@@ -756,6 +989,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLang();
   initMobileMenu();
   initWhatsappFab();
+  initLazyImages();
   setFooterYear();
 
   renderHomeProjects();

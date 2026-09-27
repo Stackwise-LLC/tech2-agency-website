@@ -1,13 +1,34 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Service — 2Tech Agency</title>
-  <meta name="description" content="Service detail — 2Tech Agency, USA." />
+  <title>Digital Services | Web, SEO & AI | 2Tech Agency</title>
+  <meta name="robots" content="index, follow" />
+  <meta name="description"
+    content="Explore detailed web development, software development, UI/UX design, SEO and digital technology services from 2Tech Agency." />
+  <link rel="canonical" href="https://2techagency.space/service.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="2Tech Agency" />
+  <meta property="og:title" content="Digital Services | Web, SEO & AI | 2Tech Agency" />
+  <meta property="og:description" content="Explore web, software, SEO and AI services from 2Tech Agency." />
+  <meta property="og:url" content="https://2techagency.space/service.html" />
+  <meta property="og:image" content="https://2techagency.space/assets/icon-app.png" />
+  <meta property="og:image:alt" content="2Tech Agency logo" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Digital Services | Web, SEO & AI | 2Tech Agency" />
+  <meta name="twitter:description" content="Explore web, software, SEO and AI services from 2Tech Agency." />
+  <meta name="twitter:image" content="https://2techagency.space/assets/icon-app.png" />
+  <meta name="twitter:image:alt" content="2Tech Agency logo" />
   <link rel="icon" href="assets/icon-app.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
@@ -29,7 +50,8 @@
       </nav>
       <div class="header-actions">
         <button class="icon-btn" id="langToggle" type="button" aria-label="Switch language">FR</button>
-        <button class="hamburger" id="hamburger" type="button" aria-expanded="false" aria-controls="mainNav" aria-label="Open menu"><span></span></button>
+        <button class="hamburger" id="hamburger" type="button" aria-expanded="false" aria-controls="mainNav"
+          aria-label="Open menu"><span></span></button>
       </div>
     </div>
   </header>
@@ -40,13 +62,20 @@
       e.g. service.html?s=web-design — see SERVICES array and renderServicePage() in js/main.js.
       No separate HTML file is created per service.
     -->
-    <div id="serviceRoot"></div>
+    <div id="serviceRoot">
+      <div class="section container">
+        <h1>Digital Services from 2Tech Agency</h1>
+        <p>Explore web development, software development, UI/UX design and SEO services for businesses in Morocco and
+          worldwide.</p>
+      </div>
+    </div>
 
     <section class="section section-alt">
       <div class="container">
         <div class="card" style="padding: clamp(2rem, 5vw, 3.4rem); text-align:center;">
           <h2 data-i18n="service.ctaTitle">Ready to talk about this?</h2>
-          <p class="center" style="max-width:52ch;" data-i18n="service.ctaLead">Tell us about your project and we'll recommend the right scope.</p>
+          <p class="center" style="max-width:52ch;" data-i18n="service.ctaLead">Tell us about your project and we'll
+            recommend the right scope.</p>
           <div class="cta-row" style="justify-content:center;">
             <a class="btn btn-primary" href="contact.html" data-i18n="cta.button">Contact us</a>
           </div>
@@ -66,7 +95,7 @@
           <p data-i18n="footer.tagline">Digital agency based in the United States, building for clients worldwide.</p>
         </div>
         <div class="footer-col">
-          <h4 data-i18n="footer.links">Quick links</h4>
+          <h2 class="footer-heading" data-i18n="footer.links">Quick links</h2>
           <ul>
             <li><a href="index.html" data-i18n="nav.home">Home</a></li>
             <li><a href="services.html" data-i18n="nav.services">Services</a></li>
@@ -75,7 +104,7 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4 data-i18n="footer.services">Services</h4>
+          <h2 class="footer-heading" data-i18n="footer.services">Services</h2>
           <ul>
             <li><a href="services.html#web" data-i18n="cat.web.title">Web &amp; Apps</a></li>
             <li><a href="services.html#marketing" data-i18n="cat.marketing.title">Marketing</a></li>
@@ -84,7 +113,7 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4 data-i18n="footer.contact">Contact</h4>
+          <h2 class="footer-heading" data-i18n="footer.contact">Contact</h2>
           <ul>
             <li data-i18n="contact.address">United States</li>
             <li><a href="mailto:contact@2techagency.space">contact@2techagency.space</a></li>
@@ -99,10 +128,15 @@
     </div>
   </footer>
 
-  <a class="whatsapp-fab" id="whatsappFab" href="#" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 0C7.2 0 0 7.2 0 16c0 2.8.7 5.5 2.1 7.9L0 32l8.3-2.1c2.3 1.3 4.9 2 7.7 2 8.8 0 16-7.2 16-16S24.8 0 16 0zm0 29.3c-2.5 0-4.9-.7-7-1.9l-.5-.3-4.9 1.3 1.3-4.8-.3-.5C3.4 21 2.7 18.6 2.7 16 2.7 8.7 8.7 2.7 16 2.7S29.3 8.7 29.3 16 23.3 29.3 16 29.3zm7.6-9.9c-.4-.2-2.4-1.2-2.8-1.3-.4-.1-.6-.2-.9.2s-1 1.3-1.2 1.5c-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8.2-.2.4-.4.5-.6.2-.2.2-.4.4-.6.1-.2.1-.5 0-.7-.1-.2-.9-2.2-1.3-3-.3-.8-.7-.7-.9-.7h-.8c-.2 0-.6.1-.9.5-.3.4-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.7 5.9 5.1.8.3 1.5.5 2 .7.8.3 1.6.2 2.1.1.7-.1 2.4-.9 2.7-1.9.3-.9.3-1.7.2-1.9-.1-.2-.3-.3-.7-.5z"/></svg>
+  <a class="whatsapp-fab" id="whatsappFab" href="#" target="_blank" rel="noopener"
+    aria-label="Chat with us on WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      <path
+        d="M16 0C7.2 0 0 7.2 0 16c0 2.8.7 5.5 2.1 7.9L0 32l8.3-2.1c2.3 1.3 4.9 2 7.7 2 8.8 0 16-7.2 16-16S24.8 0 16 0zm0 29.3c-2.5 0-4.9-.7-7-1.9l-.5-.3-4.9 1.3 1.3-4.8-.3-.5C3.4 21 2.7 18.6 2.7 16 2.7 8.7 8.7 2.7 16 2.7S29.3 8.7 29.3 16 23.3 29.3 16 29.3zm7.6-9.9c-.4-.2-2.4-1.2-2.8-1.3-.4-.1-.6-.2-.9.2s-1 1.3-1.2 1.5c-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8.2-.2.4-.4.5-.6.2-.2.2-.4.4-.6.1-.2.1-.5 0-.7-.1-.2-.9-2.2-1.3-3-.3-.8-.7-.7-.9-.7h-.8c-.2 0-.6.1-.9.5-.3.4-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.7 5.9 5.1.8.3 1.5.5 2 .7.8.3 1.6.2 2.1.1.7-.1 2.4-.9 2.7-1.9.3-.9.3-1.7.2-1.9-.1-.2-.3-.3-.7-.5z" />
+    </svg>
   </a>
 
   <script src="js/main.js"></script>
 </body>
+
 </html>
