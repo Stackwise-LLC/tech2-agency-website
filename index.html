@@ -109,34 +109,28 @@
 
   <main id="main">
     <!-- ================= HERO ================= -->
-    <section class="hero relative overflow-hidden bg-slate-950 text-white px-4 py-8 md:px-8 md:py-16">
+    <section class="hero">
       <!-- ambient glows -->
-      <div
-        class="absolute -top-40 -left-40 w-[480px] h-[480px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none"
-        aria-hidden="true"></div>
-      <div
-        class="absolute -bottom-48 -right-32 w-[420px] h-[420px] rounded-full bg-cyan-500/10 blur-[120px] pointer-events-none"
-        aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-a" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
 
-      <div class="container relative">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
+      <div class="container hero-inner">
+        <div class="hero-grid">
 
           <!-- Left: content -->
-          <div>
-            <p class="uppercase tracking-[0.28em] text-[0.72rem] sm:text-xs text-slate-400 mb-4 md:mb-6"
-              data-i18n-html="hero.eyebrow">Innovation <span class="text-cyan-400">•</span> Technology <span
-                class="text-cyan-400">•</span> Impact</p>
-            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-4 md:mb-6"
-              data-i18n-html="hero.title">We Build<br /><span class="text-gradient">Digital Solutions</span><br />for a
+          <div class="hero-content">
+            <p class="hero-kicker" data-i18n-html="hero.eyebrow">Innovation <span class="text-cyan-400">•</span>
+              Technology <span class="text-cyan-400">•</span> Impact</p>
+            <h1 data-i18n-html="hero.title">We Build<br /><span class="text-gradient">Digital Solutions</span><br />for
+              a
               Better Future</h1>
-            <p class="text-slate-400 max-w-xl text-base sm:text-lg leading-relaxed mb-6 md:mb-8" data-i18n="hero.lead">
+            <p class="hero-lead" data-i18n="hero.lead">
               2Tech Agency is a forward-thinking digital agency, specialized in web development, mobile applications,
               and technology solutions that turn ideas into real impact.</p>
-            <div class="cta-row flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <a class="btn btn-primary w-full sm:w-auto text-center" href="contact.html"><span
-                  data-i18n="hero.ctaPrimary">Start Your Project</span>&nbsp;<span aria-hidden="true">→</span></a>
-              <a class="btn btn-outline w-full sm:w-auto text-center" href="services.html"
-                data-i18n="hero.ctaSecondary">Our Services</a>
+            <div class="cta-row">
+              <a class="btn btn-primary" href="contact.html"><span data-i18n="hero.ctaPrimary">Start Your
+                  Project</span>&nbsp;<span aria-hidden="true">→</span></a>
+              <a class="btn btn-outline" href="services.html" data-i18n="hero.ctaSecondary">Our Services</a>
             </div>
             <div class="hero-stats">
               <div class="hero-stat"><strong data-i18n="hero.stat1n">50+</strong><span data-i18n="hero.stat1l">Projects
@@ -149,21 +143,21 @@
           </div>
 
           <!-- Right: visual -->
-          <div class="relative flex items-center justify-center py-6 lg:py-10">
-            <div class="absolute w-[380px] h-[380px] rounded-full bg-blue-600/30 blur-[110px] pointer-events-none"
-              aria-hidden="true"></div>
-            <img src="assets/icon-app.png" alt="2Tech Agency logo" width="352" height="352" fetchpriority="high"
-              class="float-anim relative w-60 sm:w-72 lg:w-[22rem] rounded-[24%] shadow-[0_30px_70px_rgba(37,99,235,0.5)]" />
-            <div
-              class="hero-feature-card absolute bottom-2 right-1 sm:right-4 lg:right-2 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-md px-5 py-4 shadow-2xl">
-              <ul class="flex flex-col gap-1.5 text-sm text-slate-300">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"
-                    aria-hidden="true"></span><span data-i18n="hero.side1">Ideas</span></li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"
-                    aria-hidden="true"></span><span data-i18n="hero.side2">Technology</span></li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"
-                    aria-hidden="true"></span><span data-i18n="hero.side3">Web Development</span></li>
-              </ul>
+          <div class="hero-visual">
+            <div class="hero-logo-wrap">
+              <div class="hero-logo-glow" aria-hidden="true"></div>
+              <img src="assets/icon-app.png" alt="2Tech Agency logo" width="352" height="352" fetchpriority="high"
+                class="hero-logo float-anim" />
+              <div class="hero-feature-card">
+                <ul>
+                  <li><span class="hero-feature-dot" aria-hidden="true"></span><span data-i18n="hero.side1">Ideas</span>
+                  </li>
+                  <li><span class="hero-feature-dot" aria-hidden="true"></span><span
+                      data-i18n="hero.side2">Technology</span></li>
+                  <li><span class="hero-feature-dot" aria-hidden="true"></span><span data-i18n="hero.side3">Web
+                      Development</span></li>
+                </ul>
+              </div>
             </div>
           </div>
 
