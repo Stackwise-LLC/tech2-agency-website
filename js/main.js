@@ -109,6 +109,10 @@ const DICT = {
   'footer.links': { en: 'Quick links', fr: 'Liens rapides' },
   'footer.services': { en: 'Services', fr: 'Services' },
   'footer.contact': { en: 'Contact', fr: 'Contact' },
+  'footer.refund': { en: 'Refund & Cancellation', fr: 'Remboursement et annulation' },
+  'footer.terms': { en: 'Terms of Service', fr: 'Conditions générales de vente' },
+  'footer.privacy': { en: 'Privacy Policy', fr: 'Politique de confidentialité' },
+  'footer.legal': { en: 'Legal & Contact', fr: 'Mentions légales et contact' },
   'footer.rights': { en: 'All rights reserved.', fr: 'Tous droits réservés.' },
 
   'services.pageEyebrow': { en: 'Services', fr: 'Services' },
@@ -279,6 +283,10 @@ function applyLang(lang) {
     langBtn.setAttribute('aria-label', lang === 'fr' ? 'Switch to English' : 'Passer au français');
   }
 
+  document.querySelectorAll('[data-set-lang]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.setLang === lang));
+  });
+
   // Re-render any JS-driven content (services / projects lists) in the new language.
   document.dispatchEvent(new CustomEvent('langchange', { detail: { lang } }));
 }
@@ -294,6 +302,12 @@ function initLang() {
       applyLang(next);
     });
   }
+  document.querySelectorAll('[data-set-lang]').forEach((b) => {
+    b.addEventListener('click', () => {
+      localStorage.setItem(LANG_KEY, b.dataset.setLang);
+      applyLang(b.dataset.setLang);
+    });
+  });
 }
 
 /* ---------- 3. Mobile menu ---------- */
